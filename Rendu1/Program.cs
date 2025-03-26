@@ -1,179 +1,232 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Rendu1
 {
-    internal class Program
+    class Program
     {
+        // Couleurs pour la console
+        private static readonly ConsoleColor CouleurTitre = ConsoleColor.Cyan;
+        private static readonly ConsoleColor CouleurSousTitre = ConsoleColor.Yellow;
+        private static readonly ConsoleColor CouleurTexte = ConsoleColor.White;
+        private static readonly ConsoleColor CouleurErreur = ConsoleColor.Red;
+        private static readonly ConsoleColor CouleurSucces = ConsoleColor.Green;
+        private static readonly ConsoleColor CouleurInfo = ConsoleColor.Blue;
+
         static void Main(string[] args)
         {
-            Graphe graphe = new Graphe();    
-            ChargerDonnees(graphe);
-            AnalyserGraphe(graphe);
-            VisualiserGraphe(graphe);
-        }
-
-        /// Charge les données du fichier et construit le graphe
-        private static void ChargerDonnees(Graphe graphe)
-        {
-            // Obtenir le chemin du répertoire de l'exécutable
-            string repertoireExecution = AppDomain.CurrentDomain.BaseDirectory;
-            // Remonter jusqu'au répertoire du projet 
-            string repertoireProjet = Path.GetFullPath(Path.Combine(repertoireExecution, "..\\..\\..\\"));
-            // Combiner avec le chemin relatif du fichier
-            string fichier = Path.Combine(repertoireProjet, "Association-soc-karate", "soc-karate.mtx");
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
             
-            Console.WriteLine($"Lecture de {fichier}");
-            if (!File.Exists(fichier))
+            AfficherTitre("SYSTÈME DE NAVIGATION MÉTRO PARISIEN");
+            
+            // Chemin vers le fichier CSV contenant les données du métro
+            string cheminFichierMetro = Path.Combine("DataMetro", "metro.csv");
+            
+            // Vérifier si le fichier de données existe
+            if (!File.Exists(cheminFichierMetro))
             {
-                Console.WriteLine($"Le fichier {fichier} n'existe pas.");
+                AfficherErreur($"Le fichier {cheminFichierMetro} n'existe pas.");
+                AfficherTexte("Veuillez vérifier que le dossier DataMetro contient le fichier metro.csv.");
+                AfficherTexte("\nAppuyez sur une touche pour quitter...");
+                Console.ReadKey();
                 return;
             }
-
-            // Lecture du fichier
-            string[] lignes = File.ReadAllLines(fichier);
-            Console.WriteLine($"Nombre de lignes lues : {lignes.Length}");
             
-            // identification de tous les noeuds
-            List<int> noeudsUniques = IdentifierNoeuds(lignes);
-            Console.WriteLine($"Nombre de noeuds trouvés : {noeudsUniques.Count}");
-
-            // Ajouter tous les noeuds au graphe
-            foreach (int id in noeudsUniques)
+            // Chargement des données du métro parisien
+            AfficherInfo("\nChargement des données du métro parisien...");
+            MetroParisien metroParisien = new MetroParisien(cheminFichierMetro);
+            
+            bool continuer = true;
+            
+            while (continuer)
             {
-                graphe.AjouterNoeud(id);
-            }
-
-            // ajoute les liens
-            int nombreLiens = AjouterLiens(graphe, lignes);
-            Console.WriteLine($"Nombre de liens ajoutés : {nombreLiens}");
-        }
-        /// Identifie tous les noeuds uniques dans le fichier
-        private static List<int> IdentifierNoeuds(string[] lignes)
-        {
-            List<int> noeudsUniques = new List<int>();
-            bool lectureCommencee = false;
-
-            foreach (string ligne in lignes)
-            {
-                // Ignore les lignes de commentaire au début du fichier
-                if (ligne.StartsWith("%")) continue;
-                
-                // Ignorer la première ligne non-commentaire qui ne sont pas utile
-                if (!lectureCommencee)
+                // Recherche d'itinéraire
+                if (RechercherItinerairePersonnalisé(metroParisien) == false)
                 {
-                    lectureCommencee = true;
-                    continue;
+                    continuer = false;
                 }
-
-                string[] elements = ligne.Trim().Split(' ');
-                if (elements.Length >= 2)
+                
+                if (continuer)
                 {
-                    int source = int.Parse(elements[0]);
-                    int destination = int.Parse(elements[1]);
-                    if (!noeudsUniques.Contains(source))
+                    AfficherSeparateur();
+                    AfficherTexte("Appuyez sur Entrée pour rechercher un nouvel itinéraire");
+                    AfficherTexte("ou sur 'q' pour quitter");
+                    AfficherSeparateur();
+                    
+                    string choix = Console.ReadLine() ?? "";
+                    if (choix.ToLower() == "q")
                     {
-                        noeudsUniques.Add(source);
-                    }
-                    if (!noeudsUniques.Contains(destination))
-                    {
-                        noeudsUniques.Add(destination);
+                        continuer = false;
                     }
                 }
             }
-
-            return noeudsUniques;
-        }
-
-        /// Ajoute les liens au graphe à partir des données du fichier
-        private static int AjouterLiens(Graphe graphe, string[] lignes)
-        {
-            int nombreLiens = 0;
-            bool lectureCommencee = false;
             
-            foreach (string ligne in lignes)
-            {
-                // Ignorer les lignes de commentaire
-                if (ligne.StartsWith("%")) continue;
-                
-                // Ignorer la première ligne non-commentaire non utile
-                if (!lectureCommencee)
-                {
-                    lectureCommencee = true;
-                    continue;
-                }
-
-                string[] elements = ligne.Trim().Split(' ');
-                if (elements.Length >= 2)
-                {
-                    int source = int.Parse(elements[0]);
-                    int destination = int.Parse(elements[1]);
-                    graphe.AjouterLien(source, destination);
-                    nombreLiens++;
-                }
-            }
-
-            return nombreLiens;
-        }
-        /// Analyse les propriétés du graphe et affiche les résultats
-        private static void AnalyserGraphe(Graphe graphe)
-        {
-            Console.WriteLine("\n╔════════════════════════════════════════════════╗");
-            Console.WriteLine("║     ANALYSE DU GRAPHE - ASSOCIATION KARATE     ║");
-            Console.WriteLine("╚════════════════════════════════════════════════╝");
-            
-            // Caractéristiques principales
-            Console.WriteLine("\nLES CARACTÉRISTIQUES PRINCIPALES:");
-            Console.WriteLine($"• Ordre: {graphe.ObtenirOrdre()} noeuds");
-            Console.WriteLine($"• Taille: {graphe.ObtenirTaille()} liens");
-            Console.WriteLine($"• Type: {(graphe.EstOriente ? "Orienté" : "Non orienté")}, {(graphe.EstPondere ? "Pondéré" : "Non pondéré")}");
-            
-            // Propriétés structurelles
-            Console.WriteLine("\nPROPRIÉTÉS DU GRAPHE:");
-            Console.WriteLine($"• Densité: {graphe.CalculerDensite():F3} ({graphe.CalculerDensite()*100:F1}%)");
-            Console.WriteLine($"• Degré: min={graphe.CalculerDegreMinimum()}, moyen={graphe.CalculerDegreMoyen():F2}, max={graphe.CalculerDegreMaximum()}");
-            Console.WriteLine($"• Connexité: {(graphe.EstConnexe() ? "Graphe connexe" : "Graphe non connexe")}");
-            Console.WriteLine($"• Cycles: {(graphe.ContientCycles() ? "Présents" : "Absents")}");
-            Console.WriteLine($"• Complétude: {(graphe.EstComplet() ? "Graphe complet" : "Graphe non complet")}");
-            
-            // Parcours
-            Console.WriteLine("\nPARCOURS À PARTIR DU NOEUD 1:");
-            
-            Console.WriteLine("• Parcours en largeur:");
-            List<int> parcoursLargeur = graphe.ParcoursLargeur(1);
-            AfficherParcours(parcoursLargeur);
-
-            Console.WriteLine("\n• Parcours en profondeur:");
-            List<int> parcoursProfondeur = graphe.ParcoursProfondeur(1);
-            AfficherParcours(parcoursProfondeur);
+            AfficherTexte("\nMerci d'avoir utilisé le système de navigation du métro parisien.");
         }
         
-        /// Affiche un parcourrs de graphe
-        private static void AfficherParcours(List<int> parcours)
+        /// <summary>
+        /// Permet à l'utilisateur de rechercher un itinéraire personnalisé
+        /// </summary>
+        /// <returns>true pour continuer, false pour quitter</returns>
+        static bool RechercherItinerairePersonnalisé(MetroParisien metroParisien)
         {
-            for (int i = 0; i < parcours.Count; i += 10)
+            AfficherSousTitre("RECHERCHE D'ITINÉRAIRE PERSONNALISÉ");
+            
+            // Sélection de la station de départ
+            string stationDepart = SélectionnerStation(metroParisien, "départ");
+            if (string.IsNullOrEmpty(stationDepart))
+                return false;
+            
+            // Sélection de la station d'arrivée
+            string stationArrivee = SélectionnerStation(metroParisien, "arrivée");
+            if (string.IsNullOrEmpty(stationArrivee))
+                return false;
+            
+            // Éviter de rechercher un trajet vers la même station
+            if (stationDepart == stationArrivee)
             {
-                // Prendr au maximum 10 éléments à partir de la pos de départ
-                List<int> groupe = new List<int>();
-                for (int j = i; j < i + 10 && j < parcours.Count; j++)
+                AfficherErreur("\nLes stations de départ et d'arrivée sont identiques.");
+                return true;
+            }
+            
+            AfficherSeparateur();
+            AfficherTexte($"Recherche d'itinéraire de {stationDepart} à {stationArrivee}");
+            AfficherSeparateur();
+            
+            // Recherche du plus court chemin
+            metroParisien.TrouverPlusCourtChemin(stationDepart, stationArrivee);
+            
+            return true;
+        }
+        
+        /// <summary>
+        /// Permet à l'utilisateur de sélectionner une station existante
+        /// </summary>
+        /// <param name="metroParisien">Le système métro</param>
+        /// <param name="type">Le type de station (départ ou arrivée)</param>
+        /// <returns>Le nom de la station sélectionnée ou null si l'utilisateur annule</returns>
+        static string SélectionnerStation(MetroParisien metroParisien, string type)
+        {
+            while (true)
+            {
+                AfficherTexte($"\nEntrez le nom (ou une partie) de la station de {type} (ou 'q' pour quitter): ");
+                string recherche = Console.ReadLine();
+                
+                if (recherche?.ToLower() == "q")
+                    return null;
+                
+                if (string.IsNullOrWhiteSpace(recherche) || recherche.Length < 2)
                 {
-                    groupe.Add(parcours[j]);
+                    AfficherErreur("Veuillez entrer au moins 2 caractères pour la recherche.");
+                    continue;
                 }
                 
-                Console.WriteLine(string.Join(" -> ", groupe));
+                // Rechercher toutes les stations qui contiennent la chaîne de recherche (insensible à la casse)
+                var correspondances = metroParisien.StationsParNom.Keys
+                    .Where(nom => nom.IndexOf(recherche, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .OrderBy(nom => nom)
+                    .ToList();
+                
+                if (correspondances.Count == 0)
+                {
+                    AfficherErreur("\nAucune station ne correspond à votre recherche. Essayez avec un autre terme.");
+                    continue;
+                }
+                
+                // Si une seule correspondance exacte est trouvée, la sélectionner automatiquement
+                if (correspondances.Count == 1 || correspondances.Contains(recherche, StringComparer.OrdinalIgnoreCase))
+                {
+                    string stationExacte = correspondances.FirstOrDefault(s => s.Equals(recherche, StringComparison.OrdinalIgnoreCase)) ?? correspondances.First();
+                    AfficherSucces($"\nStation sélectionnée: {stationExacte}");
+                    return stationExacte;
+                }
+                
+                // Afficher les résultats de la recherche
+                AfficherTexte($"\n{correspondances.Count} stations trouvées pour '{recherche}':");
+                
+                // Limiter l'affichage à 15 résultats maximum
+                int maxResultats = Math.Min(15, correspondances.Count);
+                for (int i = 0; i < maxResultats; i++)
+                {
+                    AfficherTexte($"{i + 1}. {correspondances[i]}");
+                }
+                
+                if (correspondances.Count > maxResultats)
+                {
+                    AfficherTexte($"... et {correspondances.Count - maxResultats} autres stations.");
+                    AfficherTexte("Veuillez affiner votre recherche pour voir plus de résultats.");
+                }
+                
+                AfficherTexte("\nEntrez le numéro de la station désirée (ou 0 pour refaire la recherche): ");
+                if (!int.TryParse(Console.ReadLine(), out int choix) || choix < 0 || choix > maxResultats)
+                {
+                    AfficherErreur("Choix invalide. Veuillez réessayer.");
+                    continue;
+                }
+                
+                if (choix == 0)
+                    continue;
+                
+                return correspondances[choix - 1];
             }
         }
-        private static void VisualiserGraphe(Graphe graphe)
+
+        #region Méthodes d'affichage
+
+        private static void AfficherTitre(string titre)
         {
-            string fichierImage = "graphe.png";
-            Console.WriteLine("\nVISUALISATION DU GRAPHE");
-            Console.WriteLine($"Génération de l'image dans '{fichierImage}'..."); 
-            VisualisationGraphe visualisation = new VisualisationGraphe(graphe);
-            visualisation.Dessiner(fichierImage);
-            
-            Console.WriteLine($"Visualisation sauvegardée avec succès.");
+            Console.ForegroundColor = CouleurTitre;
+            Console.WriteLine("\n" + new string('=', titre.Length + 4));
+            Console.WriteLine($"= {titre} =");
+            Console.WriteLine(new string('=', titre.Length + 4) + "\n");
+            Console.ForegroundColor = CouleurTexte;
         }
+
+        private static void AfficherSousTitre(string sousTitre)
+        {
+            Console.ForegroundColor = CouleurSousTitre;
+            Console.WriteLine("\n" + new string('-', sousTitre.Length + 4));
+            Console.WriteLine($"- {sousTitre} -");
+            Console.WriteLine(new string('-', sousTitre.Length + 4) + "\n");
+            Console.ForegroundColor = CouleurTexte;
+        }
+
+        private static void AfficherSeparateur()
+        {
+            Console.ForegroundColor = CouleurInfo;
+            Console.WriteLine(new string('=', 50));
+            Console.ForegroundColor = CouleurTexte;
+        }
+
+        private static void AfficherTexte(string texte)
+        {
+            Console.ForegroundColor = CouleurTexte;
+            Console.WriteLine(texte);
+        }
+
+        private static void AfficherErreur(string message)
+        {
+            Console.ForegroundColor = CouleurErreur;
+            Console.WriteLine(message);
+            Console.ForegroundColor = CouleurTexte;
+        }
+
+        private static void AfficherSucces(string message)
+        {
+            Console.ForegroundColor = CouleurSucces;
+            Console.WriteLine(message);
+            Console.ForegroundColor = CouleurTexte;
+        }
+
+        private static void AfficherInfo(string message)
+        {
+            Console.ForegroundColor = CouleurInfo;
+            Console.WriteLine(message);
+            Console.ForegroundColor = CouleurTexte;
+        }
+
+        #endregion
     }
 }

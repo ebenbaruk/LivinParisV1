@@ -9,7 +9,7 @@ namespace LivinParisTest
         public void TestCreationGraphe()
         {
             // Arrange & Act
-            Graphe graphe = new Graphe();
+            Graphe<int> graphe = new Graphe<int>();
             
             // Assert
             Assert.AreEqual(0, graphe.ObtenirOrdre(), "Un nouveau graphe doit avoir 0 noeud");
@@ -22,12 +22,12 @@ namespace LivinParisTest
         public void TestAjoutNoeudsEtLiens()
         {
             // Arrange
-            Graphe graphe = new Graphe();
+            Graphe<int> graphe = new Graphe<int>();
             
             // Act
-            graphe.AjouterNoeud(1);
-            graphe.AjouterNoeud(2);
-            graphe.AjouterNoeud(3);
+            graphe.AjouterNoeud(1, 1);
+            graphe.AjouterNoeud(2, 2);
+            graphe.AjouterNoeud(3, 3);
             graphe.AjouterLien(1, 2);
             graphe.AjouterLien(2, 3);
             
@@ -40,11 +40,11 @@ namespace LivinParisTest
         public void TestParcoursLargeur()
         {
             // Arrange
-            Graphe graphe = new Graphe();
-            graphe.AjouterNoeud(1);
-            graphe.AjouterNoeud(2);
-            graphe.AjouterNoeud(3);
-            graphe.AjouterNoeud(4);
+            Graphe<int> graphe = new Graphe<int>();
+            graphe.AjouterNoeud(1, 1);
+            graphe.AjouterNoeud(2, 2);
+            graphe.AjouterNoeud(3, 3);
+            graphe.AjouterNoeud(4, 4);
             graphe.AjouterLien(1, 2);
             graphe.AjouterLien(1, 3);
             graphe.AjouterLien(2, 4);
@@ -68,17 +68,17 @@ namespace LivinParisTest
         public void TestEstConnexe()
         {
             // Arrange
-            Graphe grapheConnexe = new Graphe();
-            grapheConnexe.AjouterNoeud(1);
-            grapheConnexe.AjouterNoeud(2);
-            grapheConnexe.AjouterNoeud(3);
+            Graphe<int> grapheConnexe = new Graphe<int>();
+            grapheConnexe.AjouterNoeud(1, 1);
+            grapheConnexe.AjouterNoeud(2, 2);
+            grapheConnexe.AjouterNoeud(3, 3);
             grapheConnexe.AjouterLien(1, 2);
             grapheConnexe.AjouterLien(2, 3);
             
-            Graphe grapheNonConnexe = new Graphe();
-            grapheNonConnexe.AjouterNoeud(1);
-            grapheNonConnexe.AjouterNoeud(2);
-            grapheNonConnexe.AjouterNoeud(3);
+            Graphe<int> grapheNonConnexe = new Graphe<int>();
+            grapheNonConnexe.AjouterNoeud(1, 1);
+            grapheNonConnexe.AjouterNoeud(2, 2);
+            grapheNonConnexe.AjouterNoeud(3, 3);
             grapheNonConnexe.AjouterLien(1, 2);
             // Pas de lien vers le noeud 3
             
@@ -91,17 +91,17 @@ namespace LivinParisTest
         public void TestContientCycles()
         {
             // Arrange
-            Graphe grapheSansCycle = new Graphe();
-            grapheSansCycle.AjouterNoeud(1);
-            grapheSansCycle.AjouterNoeud(2);
-            grapheSansCycle.AjouterNoeud(3);
+            Graphe<int> grapheSansCycle = new Graphe<int>();
+            grapheSansCycle.AjouterNoeud(1, 1);
+            grapheSansCycle.AjouterNoeud(2, 2);
+            grapheSansCycle.AjouterNoeud(3, 3);
             grapheSansCycle.AjouterLien(1, 2);
             grapheSansCycle.AjouterLien(2, 3);
             
-            Graphe grapheAvecCycle = new Graphe();
-            grapheAvecCycle.AjouterNoeud(1);
-            grapheAvecCycle.AjouterNoeud(2);
-            grapheAvecCycle.AjouterNoeud(3);
+            Graphe<int> grapheAvecCycle = new Graphe<int>();
+            grapheAvecCycle.AjouterNoeud(1, 1);
+            grapheAvecCycle.AjouterNoeud(2, 2);
+            grapheAvecCycle.AjouterNoeud(3, 3);
             grapheAvecCycle.AjouterLien(1, 2);
             grapheAvecCycle.AjouterLien(2, 3);
             grapheAvecCycle.AjouterLien(3, 1); // Crée un cycle 1-2-3-1
