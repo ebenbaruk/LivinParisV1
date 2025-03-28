@@ -9,8 +9,8 @@ namespace Rendu1
     public class MetroVisualisation
     {
         private readonly Graphe<Station> graphe;
-        private Dictionary<int, SKPoint> positionsStations;
-        private Dictionary<string, SKColor> couleursLignes;
+        private readonly Dictionary<int, SKPoint> positionsStations;
+        private readonly Dictionary<string, SKColor> couleursLignes;
         
         // Constantes pour le dessin
         private const int LARGEUR = 1600;
@@ -23,37 +23,38 @@ namespace Rendu1
         
         public MetroVisualisation(Graphe<Station> graphe)
         {
-            this.graphe = graphe;
+            this.graphe = graphe ?? throw new ArgumentNullException(nameof(graphe));
             this.positionsStations = new Dictionary<int, SKPoint>();
+            this.couleursLignes = new Dictionary<string, SKColor>();
             InitialiserCouleursLignes();
             CalculerPositionsStations();
         }
         
         private void InitialiserCouleursLignes()
         {
-            couleursLignes = new Dictionary<string, SKColor>
-            {
-                { "1", new SKColor(255, 206, 0) },      // Jaune
-                { "2", new SKColor(0, 0, 255) },        // Bleu
-                { "3", new SKColor(149, 179, 64) },     // Vert olive
-                { "3bis", new SKColor(134, 204, 206) }, // Bleu clair
-                { "4", new SKColor(187, 76, 158) },     // Violet
-                { "5", new SKColor(255, 137, 0) },      // Orange
-                { "6", new SKColor(118, 188, 33) },     // Vert lime
-                { "7", new SKColor(255, 170, 213) },    // Rose
-                { "7bis", new SKColor(122, 211, 193) }, // Turquoise
-                { "8", new SKColor(155, 105, 203) },    // Mauve
-                { "9", new SKColor(168, 219, 168) },    // Vert mint
-                { "10", new SKColor(226, 156, 0) },     // Jaune foncé
-                { "11", new SKColor(128, 63, 33) },     // Brun
-                { "12", new SKColor(0, 154, 73) },      // Vert
-                { "13", new SKColor(137, 207, 227) },   // Bleu ciel
-                { "14", new SKColor(100, 25, 115) }     // Violet foncé
-            };
+            couleursLignes.Clear();
+            couleursLignes.Add("1", new SKColor(255, 206, 0));      // Jaune
+            couleursLignes.Add("2", new SKColor(0, 0, 255));        // Bleu
+            couleursLignes.Add("3", new SKColor(149, 179, 64));     // Vert olive
+            couleursLignes.Add("3bis", new SKColor(134, 204, 206)); // Bleu clair
+            couleursLignes.Add("4", new SKColor(187, 76, 158));     // Violet
+            couleursLignes.Add("5", new SKColor(255, 137, 0));      // Orange
+            couleursLignes.Add("6", new SKColor(118, 188, 33));     // Vert lime
+            couleursLignes.Add("7", new SKColor(255, 170, 213));    // Rose
+            couleursLignes.Add("7bis", new SKColor(122, 211, 193)); // Turquoise
+            couleursLignes.Add("8", new SKColor(155, 105, 203));    // Mauve
+            couleursLignes.Add("9", new SKColor(168, 219, 168));    // Vert mint
+            couleursLignes.Add("10", new SKColor(226, 156, 0));     // Jaune foncé
+            couleursLignes.Add("11", new SKColor(128, 63, 33));     // Brun
+            couleursLignes.Add("12", new SKColor(0, 154, 73));      // Vert
+            couleursLignes.Add("13", new SKColor(137, 207, 227));   // Bleu ciel
+            couleursLignes.Add("14", new SKColor(100, 25, 115));    // Violet foncé
         }
         
         private void CalculerPositionsStations()
         {
+            positionsStations.Clear();
+            
             int stationsAvecCoordsValides = 0;
             int stationsTotales = graphe.Noeuds.Count;
             
@@ -139,7 +140,7 @@ namespace Rendu1
             }
         }
         
-        public void Dessiner(string cheminFichier, List<int> itineraire = null)
+        public void Dessiner(string cheminFichier, List<int>? itineraire = null)
         {
             using (var surface = SKSurface.Create(new SKImageInfo(LARGEUR, HAUTEUR)))
             {
@@ -210,7 +211,7 @@ namespace Rendu1
             }
         }
         
-        private void DessinerStations(SKCanvas canvas, List<int> itineraire)
+        private void DessinerStations(SKCanvas canvas, List<int>? itineraire)
         {
             using (var paintStationNormale = new SKPaint
             {

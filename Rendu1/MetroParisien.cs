@@ -85,8 +85,7 @@ namespace Rendu1
                     stations[cleStation] = station;
                     
                     // Ajouter la station au graphe
-                    int idStation = stations.Count; // Utiliser un ID unique pour chaque station
-                    GrapheMetro.AjouterNoeud(idStation, station);
+                    GrapheMetro.AjouterNoeud(station);
                     
                     // Garder une référence au noeud
                     var noeud = GrapheMetro.Noeuds.LastOrDefault();
@@ -149,7 +148,7 @@ namespace Rendu1
                     double tempsParcours = GrapheMetro.TempsEntreStations;
                     
                     // Ajouter le lien (orienté)
-                    GrapheMetro.AjouterLien(idSource, idDestination, 1.0, tempsParcours);
+                    GrapheMetro.AjouterLien(idSource, idDestination, tempsParcours);
                 }
                 
                 // Ajouter les liens de correspondance
@@ -174,8 +173,8 @@ namespace Rendu1
                             if (idSource != idCorrespondance)
                             {
                                 // Ajouter un lien bidirectionnel pour les correspondances
-                                GrapheMetro.AjouterLien(idSource, idCorrespondance, 1.0, GrapheMetro.TempsChangementLigne);
-                                GrapheMetro.AjouterLien(idCorrespondance, idSource, 1.0, GrapheMetro.TempsChangementLigne);
+                                GrapheMetro.AjouterLien(idSource, idCorrespondance, GrapheMetro.TempsChangementLigne);
+                                GrapheMetro.AjouterLien(idCorrespondance, idSource, GrapheMetro.TempsChangementLigne);
                             }
                         }
                     }

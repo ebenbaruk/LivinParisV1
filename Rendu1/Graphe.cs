@@ -15,7 +15,7 @@ namespace Rendu1
         
         /// Liste d'adjacence du graphe
         public Dictionary<int, List<int>> ListeAdjacence;
-        
+
         /// Matrice de poids (pour les algorithmes de plus court chemin)
         public double[,] MatricePoids;
 
@@ -36,56 +36,26 @@ namespace Rendu1
         }
 
         /// Ajoute un noeud au graphe avec l'identifiant unique et ses données
-        public void AjouterNoeud(int id, T donnees)
+        public void AjouterNoeud(T donnees)
         {
-            // Vérifier si un noeud avec cet id existe déjà
-            if (Noeuds.Any(n => n.Id == id))
-                return;
-                
-            Noeuds.Add(new Noeud<T>(id, donnees));
-            ListeAdjacence[id] = new List<int>();
-            MettreAJourMatrices();
+            if (donnees == null)
+                throw new ArgumentNullException(nameof(donnees));
+
+            var noeud = new Noeud<T>(Noeuds.Count + 1, donnees);
+            Noeuds.Add(noeud);
         }
 
         /// Ajoute un lien entre deux noeuds identifiés par leurs ID
-        public void AjouterLien(int sourceId, int destinationId, double poids = 1.0, double tempsParcours = 2.0)
+        public void AjouterLien(int sourceId, int destinationId, double poids = 1.0)
         {
-            Noeud<T> source = Noeuds.FirstOrDefault(n => n.Id == sourceId);
-            Noeud<T> destination = Noeuds.FirstOrDefault(n => n.Id == destinationId);
-            
-            if (source != null && destination != null)
-            {
-                var lien = new Lien<T>(source, destination, EstOriente, poids, tempsParcours);
-                Liens.Add(lien);
-                source.Voisins.Add(destination);
-                
-                // Si le graphe n'est pas orienté, on ajoute aussi le lien inverse
-                if (!EstOriente)
-                    destination.Voisins.Add(source);
-                
-                // Mise à jour de la liste d'adjacence
-                if (!ListeAdjacence[sourceId].Contains(destinationId))
-                    ListeAdjacence[sourceId].Add(destinationId);
-                
-                if (!EstOriente && !ListeAdjacence[destinationId].Contains(sourceId))
-                    ListeAdjacence[destinationId].Add(sourceId);
-                
-                // Mise à jour des matrices
-                int sourceIndex = Noeuds.IndexOf(source);
-                int destIndex = Noeuds.IndexOf(destination);
-                
-                if (sourceIndex >= 0 && destIndex >= 0)
-                {
-                    MatriceAdjacence[sourceIndex, destIndex] = true;
-                    MatricePoids[sourceIndex, destIndex] = tempsParcours;
-                    
-                    if (!EstOriente)
-                    {
-                        MatriceAdjacence[destIndex, sourceIndex] = true;
-                        MatricePoids[destIndex, sourceIndex] = tempsParcours;
-                    }
-                }
-            }
+            var source = Noeuds.FirstOrDefault(n => n.Id == sourceId);
+            var destination = Noeuds.FirstOrDefault(n => n.Id == destinationId);
+
+            if (source == null || destination == null)
+                throw new ArgumentException("Source ou destination non trouvée");
+
+            var lien = new Lien<T>(source, destination, EstOriente, poids);
+            Liens.Add(lien);
         }
 
         /// Mise à jour des matrices d'adjacence et de poids
@@ -648,7 +618,7 @@ namespace Rendu1
         #endregion
         
         #region Méthodes de parcours
-        
+
         public List<int> ParcoursLargeur(int depart)
         {
             List<int> resultat = new List<int>();
@@ -710,7 +680,7 @@ namespace Rendu1
                 }
             }
         }
-        
+
         #endregion
         
         #region Méthodes utilitaires
@@ -738,27 +708,33 @@ namespace Rendu1
                 if (noeud != null)
                 {
                     var station = noeud.Donnees as Station;
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.Write($"{i+1}. ");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine($"{station}");
-                    
-                    // Calculer la distance avec la station suivante
-                    if (i < chemin.Count - 1)
+                    if (station != null)
                     {
-                        var prochainNoeud = Noeuds.FirstOrDefault(n => n.Id == chemin[i+1]);
-                        if (prochainNoeud != null)
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write($"{i+1}. ");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine($"{station}");
+                        
+                        // Calculer la distance avec la station suivante
+                        if (i < chemin.Count - 1)
                         {
-                            var prochainStation = prochainNoeud.Donnees as Station;
-                            double distance = Station.CalculerDistance(station, prochainStation);
-                            distanceTotale += distance;
-                            
-                            // Afficher les changements de ligne
-                            if (station.Ligne != prochainStation.Ligne)
+                            var prochainNoeud = Noeuds.FirstOrDefault(n => n.Id == chemin[i+1]);
+                            if (prochainNoeud != null)
                             {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine($"   Changement de ligne : {station.Ligne} -> {prochainStation.Ligne} (+ {TempsChangementLigne} min)");
-                                Console.ForegroundColor = ConsoleColor.White;
+                                var prochainStation = prochainNoeud.Donnees as Station;
+                                if (prochainStation != null)
+                                {
+                                    double distance = Station.CalculerDistance(station, prochainStation);
+                                    distanceTotale += distance;
+                                    
+                                    // Afficher les changements de ligne
+                                    if (station.Ligne != prochainStation.Ligne)
+                                    {
+                                        Console.ForegroundColor = ConsoleColor.Yellow;
+                                        Console.WriteLine($"   Changement de ligne : {station.Ligne} -> {prochainStation.Ligne} (+ {TempsChangementLigne} min)");
+                                        Console.ForegroundColor = ConsoleColor.White;
+                                    }
+                                }
                             }
                         }
                     }
@@ -771,7 +747,7 @@ namespace Rendu1
         }
         
         /// Trouve le noeud d'une station par son nom (prend la première occurrence)
-        public Noeud<T> TrouverStationParNom(string nom)
+        public Noeud<T>? TrouverStationParNom(string nom)
         {
             return Noeuds.FirstOrDefault(n => 
             {

@@ -22,7 +22,8 @@ namespace Rendu1
             AfficherTitre("SYSTÈME DE NAVIGATION MÉTRO PARISIEN");
             
             // Chemin vers le fichier CSV contenant les données du métro
-            string cheminFichierMetro = Path.Combine("DataMetro", "metro.csv");
+            string cheminBase = AppDomain.CurrentDomain.BaseDirectory;
+            string cheminFichierMetro = Path.Combine(cheminBase, "DataMetro", "metro.csv");
             
             // Vérifier si le fichier de données existe
             if (!File.Exists(cheminFichierMetro))
@@ -33,7 +34,7 @@ namespace Rendu1
                 Console.ReadKey();
                 return;
             }
-            
+
             // Chargement des données du métro parisien
             AfficherInfo("\nChargement des données du métro parisien...");
             MetroParisien metroParisien = new MetroParisien(cheminFichierMetro);
@@ -112,17 +113,17 @@ namespace Rendu1
             while (true)
             {
                 AfficherTexte($"\nEntrez le nom (ou une partie) de la station de {type} (ou 'q' pour quitter): ");
-                string recherche = Console.ReadLine();
+                string? recherche = Console.ReadLine();
                 
                 if (recherche?.ToLower() == "q")
-                    return null;
+                    return string.Empty;
                 
                 if (string.IsNullOrWhiteSpace(recherche) || recherche.Length < 2)
                 {
                     AfficherErreur("Veuillez entrer au moins 2 caractères pour la recherche.");
                     continue;
                 }
-                
+
                 // Rechercher toutes les stations qui contiennent la chaîne de recherche (insensible à la casse)
                 var correspondances = metroParisien.StationsParNom.Keys
                     .Where(nom => nom.IndexOf(recherche, StringComparison.OrdinalIgnoreCase) >= 0)
@@ -160,7 +161,8 @@ namespace Rendu1
                 }
                 
                 AfficherTexte("\nEntrez le numéro de la station désirée (ou 0 pour refaire la recherche): ");
-                if (!int.TryParse(Console.ReadLine(), out int choix) || choix < 0 || choix > maxResultats)
+                string? choixStr = Console.ReadLine();
+                if (string.IsNullOrEmpty(choixStr) || !int.TryParse(choixStr, out int choix) || choix < 0 || choix > maxResultats)
                 {
                     AfficherErreur("Choix invalide. Veuillez réessayer.");
                     continue;

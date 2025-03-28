@@ -12,13 +12,13 @@ namespace Rendu1
         public string NomLigne { get; private set; }
         
         public string Nom { get; private set; }
-        public string Coordonnees { get; set; }
-        public string ArretPrecedent { get; set; }
-        public string ArretSuivant { get; set; }
-        public List<int> ChangementsPossibles { get; set; }
+        public string Coordonnees { get; private set; }
+        public string ArretPrecedent { get; private set; }
+        public string ArretSuivant { get; private set; }
+        public string ChangementsPossibles { get; private set; }
         
         // Identifiant unique pour chaque station: ligne_nom
-        public string Id { get; set; }
+        public string Id { get; private set; }
         
         // Coordonnées géographiques parsées
         public double Latitude { get; private set; }
@@ -125,6 +125,9 @@ namespace Rendu1
         /// </summary>
         public static double CalculerDistance(Station station1, Station station2)
         {
+            if (station1 == null || station2 == null)
+                throw new ArgumentNullException(nameof(station1), "Les stations ne peuvent pas être null");
+
             const double RAYON_TERRE = 6371; // Rayon de la Terre en kilomètres
 
             // Conversion des degrés en radians
