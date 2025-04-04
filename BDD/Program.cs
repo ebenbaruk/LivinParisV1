@@ -2,7 +2,7 @@
 using Org.BouncyCastle.Asn1.Ocsp;
 using System.Reflection.PortableExecutable;
 
-namespace PSI_Amine
+namespace BDD
 {
     internal class Program
     {
