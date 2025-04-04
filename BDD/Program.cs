@@ -923,6 +923,32 @@ namespace BDD
                 }
             }
         }
+        static List<Ingredient> GetIngredients()
+        {
+            List<Ingredient> ingredients = new List<Ingredient>();
+            string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
+
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
+                connect.Open();
+                string requete = "SELECT IngredientID, NomIngredient FROM Ingredients ORDER BY NomIngredient";
+                MySqlCommand cmd = new MySqlCommand(requete, connect);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        ingredients.Add(new Ingredient
+                        {
+                            IngredientID = reader.GetInt32("IngredientID"),
+                            Nom = reader.GetString("NomIngredient")
+                        });
+                    }
+                }
+            }
+            return ingredients;
+    //Cette méthode lis les id des ingrédients dans la base de donnée et en fait une liste
+        }
         static void AfficherCommandesCuisinier(int chefId)
         {
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
