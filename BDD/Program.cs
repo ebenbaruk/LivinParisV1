@@ -2,11 +2,12 @@
 using Org.BouncyCastle.Asn1.Ocsp;
 using System.Reflection.PortableExecutable;
 
-namespace BDD
+namespace PSI_Amine
 {
     internal class Program
     {
-        static void Requete(string requete) {
+        static void Requete(string requete)
+        {
             // Paramétrage et ouverture d'une connexion avec l'objet MySqlConnection 
             string connectionString = @"
                                     SERVER=127.0.0.1;
@@ -15,8 +16,10 @@ namespace BDD
                                     UID=root;
                                     PASSWORD=1234";
 
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
-                try {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
+                try
+                {
                     connect.Open();
 
                     // Création de l'objet MySqlCommand avec la requête associée
@@ -24,14 +27,16 @@ namespace BDD
                     commande.CommandText = requete;
 
                     // Récupération des résultats dans un objet MySqlDataReader
-                    using (MySqlDataReader reader = commande.ExecuteReader()) {
+                    using (MySqlDataReader reader = commande.ExecuteReader())
+                    {
 
                         int fieldCount = reader.FieldCount; //Donne les nombre de colonnes demandées
 
                         // On convertit chaque colonne en un string dans un tableau de string
                         string[] columnNames = new string[fieldCount];
 
-                        for (int i = 0; i < fieldCount; i++) {
+                        for (int i = 0; i < fieldCount; i++)
+                        {
                             columnNames[i] = reader.GetName(i);
                         }
 
@@ -40,24 +45,31 @@ namespace BDD
                         Console.WriteLine("------------------------------");
 
                         // Lecture des données ligne par ligne
-                        while (reader.Read()) {
+                        while (reader.Read())
+                        {
                             string[] valeurs = new string[fieldCount];
-                            for (int i = 0; i < fieldCount; i++) {
+                            for (int i = 0; i < fieldCount; i++)
+                            {
                                 valeurs[i] = reader[i].ToString();
                             }
                             Console.WriteLine(string.Join(" | ", valeurs));
                         }
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Console.WriteLine("Erreur : " + ex.Message);
                 }
             } // `using` s'assure que la connexion est fermée automatiquement
         }
-        static bool VerifU(string email, string mdp) {
+        static bool VerifU(string email, string mdp)
+        {
             bool res = false;
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
-                try {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
+                try
+                {
                     connect.Open();
                     string requete = "SELECT COUNT(*) FROM Utilisateur WHERE EmailU = @Email AND MDPU = @Mdp";
                     MySqlCommand commande = new MySqlCommand(requete, connect);
@@ -65,14 +77,17 @@ namespace BDD
                     commande.Parameters.AddWithValue("@Email", email);
                     commande.Parameters.AddWithValue("@Mdp", mdp);
                     int count = Convert.ToInt32(commande.ExecuteScalar());
-                    if( count > 0) { res = true; }
-                } catch (Exception ex) {
+                    if (count > 0) { res = true; }
+                }
+                catch (Exception ex)
+                {
                     Console.WriteLine("Erreur : " + ex.Message);
                 }
                 return res;
             }
         }
-        static void CreationU() {
+        static void CreationU()
+        {
             #region Paramètres
             Console.Write("Entrez votre nom : ");
             string nom = Console.ReadLine();
@@ -107,8 +122,10 @@ namespace BDD
             #endregion
 
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
-                try {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
+                try
+                {
                     connect.Open();
                     string requete = $"INSERT INTO Utilisateur (NomU, PrenomU, RueU, NumeroU, CodePostalU, VilleU, TelephoneU, " +
                         $"EmailU, StationPlusProcheU, MDPU, AgeU, RegimeAlimentaireU, PreferenceU, AllergieU, BudgetU) " +
@@ -116,19 +133,26 @@ namespace BDD
                         $"'{station}', '{mdp}', {age}, '{regime}', '{preference}', '{allergie}', {budget})";
                     MySqlCommand commande = new MySqlCommand(requete, connect);
                     int result = commande.ExecuteNonQuery();
-                    if (result > 0) {
+                    if (result > 0)
+                    {
                         Console.WriteLine("Inscription réussie ! Vous pouvez maintenant vous connecter.");
-                    } else {
+                    }
+                    else
+                    {
                         Console.WriteLine("Erreur lors de l'inscription. Veuillez réessayer.");
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Console.WriteLine("Erreur : " + ex.Message);
                 }
             }
         }
-        static int GetClientId(string email) {
+        static int GetClientId(string email)
+        {
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
                 connect.Open();
                 string requete = "SELECT ClientID FROM Utilisateur WHERE EmailU = @Email";
                 MySqlCommand commande = new MySqlCommand(requete, connect);
@@ -137,9 +161,11 @@ namespace BDD
             }
         }
 
-        static bool VerifC(int clientId) {
+        static bool VerifC(int clientId)
+        {
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
                 connect.Open();
                 string requete = "SELECT COUNT(*) FROM Cuisinier WHERE ClientID = @ClientId";
                 MySqlCommand commande = new MySqlCommand(requete, connect);
@@ -148,11 +174,13 @@ namespace BDD
             }
         }
 
-        static void InterfaceCuisinier(int clientId) {
+        static void InterfaceCuisinier(int clientId)
+        {
             //On verif si le cuisinier a une spécialité
             string specialite = GetSpecialite(clientId);
 
-            if (string.IsNullOrEmpty(specialite)) {
+            if (string.IsNullOrEmpty(specialite))
+            {
                 Console.WriteLine("\nVous n'avez pas encore renseigné votre spécialité culinaire.");
                 Console.Write("Veuillez entrer votre spécialité (ex: Italienne, Française, etc.) : ");
                 specialite = Console.ReadLine();
@@ -161,13 +189,45 @@ namespace BDD
             }
 
             Console.WriteLine($"\nInterface Cuisinier - Spécialité: {specialite}");
-            // Ici vous ajouterez les fonctionnalités cuisinier
+            while (true)
+            {
+                Console.WriteLine("\n=== INTERFACE CUISINIER ===");
+                Console.WriteLine("1. Créer un nouveau plat");
+                Console.WriteLine("2. Voir mes plats");
+                Console.WriteLine("3. Voir les commandes en cours");
+                Console.WriteLine("4. Marquer une commande comme terminée");
+                Console.WriteLine("5. Se déconnecter");
+                Console.Write("Votre choix : ");
+
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        CreerPlat(clientId);
+                        break;
+                    case "2":
+                        AfficherMesPlats(clientId);
+                        break;
+                    case "3":
+                        AfficherCommandesCuisinier(clientId);
+                        break;
+                    case "4":
+                        MarquerCommandeTerminee(clientId);
+                        break;
+                    case "5":
+                        return;
+                    default:
+                        Console.WriteLine("Choix invalide");
+                        break;
+                }
+            }
         }
 
-        static void InterfaceClient(int clientId) {
+        static void InterfaceClient(int clientId)
+        {
             Console.WriteLine("\nInterface Client");
 
-            while (true) {
+            while (true)
+            {
                 Console.WriteLine("\nMenu Principal :");
                 Console.WriteLine("1. Passer une commande");
                 Console.WriteLine("2. Consulter mes commandes");
@@ -177,7 +237,8 @@ namespace BDD
 
                 string choix = Console.ReadLine();
 
-                switch (choix) {
+                switch (choix)
+                {
                     case "1":
                         PasserCommande(clientId);
                         break;
@@ -200,9 +261,11 @@ namespace BDD
         /// Permet de créer un cuisinier pour client qui souhaite en devnir un
         /// </summary>
         /// <param name="clientId"></param>
-        static void CreationCuisinier(int clientId) {
+        static void CreationCuisinier(int clientId)
+        {
             //Verif si le user est déjà cuisinier
-            if (VerifC(clientId)) {
+            if (VerifC(clientId))
+            {
                 Console.WriteLine("\nVous êtes déjà enregistré comme cuisinier.");
                 string specialite = GetSpecialite(clientId);
                 Console.WriteLine($"Votre spécialité actuelle : {specialite}");
@@ -210,7 +273,8 @@ namespace BDD
                 Console.Write("Voulez-vous modifier votre spécialité ? (O/N) : ");
                 string modifier = Console.ReadLine().ToUpper();
 
-                if (modifier == "O") {
+                if (modifier == "O")
+                {
                     Console.Write("Entrez votre nouvelle spécialité : ");
                     string nouvelleSpe = Console.ReadLine();
                     SetSpecialite(clientId, nouvelleSpe);
@@ -224,14 +288,17 @@ namespace BDD
             Console.Write("Voulez-vous vraiment devenir cuisinier ? (O/N) : ");
             string confirmation = Console.ReadLine().ToUpper();
 
-            if (confirmation == "O") {
+            if (confirmation == "O")
+            {
                 Console.Write("Entrez votre spécialité culinaire (ex: Italienne, Française, etc.) : ");
                 string specialite = Console.ReadLine();
 
                 SetSpecialite(clientId, specialite);
                 Console.WriteLine("\nFélicitations ! Vous êtes maintenant cuisinier.");
                 Console.WriteLine($"Spécialité enregistrée : {specialite}");
-            } else {
+            }
+            else
+            {
                 Console.WriteLine("Opération annulée.");
             }
         }
@@ -241,9 +308,11 @@ namespace BDD
         /// </summary>
         /// <param name="clientId"></param>
         /// <returns></returns>
-        static string GetSpecialite(int clientId) {
+        static string GetSpecialite(int clientId)
+        {
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
                 connect.Open();
                 string requete = "SELECT SpecialiteC FROM Cuisinier WHERE ClientID = @ClientId";
                 MySqlCommand commande = new MySqlCommand(requete, connect);
@@ -253,7 +322,8 @@ namespace BDD
             }
         }
 
-        static void SetSpecialite(int clientId, string specialite) {
+        static void SetSpecialite(int clientId, string specialite)
+        {
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
             using (MySqlConnection connect = new MySqlConnection(connectionString))
             {
@@ -266,9 +336,12 @@ namespace BDD
                 bool exists = Convert.ToInt32(verif.ExecuteScalar()) > 0;
 
                 string requete;
-                if (exists) {
+                if (exists)
+                {
                     requete = "UPDATE Cuisinier SET SpecialiteC = @Specialite WHERE ClientID = @ClientId";
-                } else {
+                }
+                else
+                {
                     requete = "INSERT INTO Cuisinier (ClientID, SpecialiteC) VALUES (@ClientId, @Specialite)";
                 }
 
@@ -282,7 +355,8 @@ namespace BDD
         /// Algo pour qu'un user passe une commande
         /// </summary>
         /// <param name="clientId"></param>
-        static void PasserCommande(int clientId) {
+        static void PasserCommande(int clientId)
+        {
             Console.WriteLine("\n=== PASSER UNE COMMANDE ===");
 
             //Etape 1 : On affiche les cuisiniers dispo
@@ -290,20 +364,23 @@ namespace BDD
             Dictionary<int, string> cuisiniers = GetCuisiniers();
 
             //Cas où il n'y a pas de cuisinier dispo
-            if (cuisiniers.Count == 0) {
+            if (cuisiniers.Count == 0)
+            {
                 Console.WriteLine("Aucun cuisinier avec plats disponibles.");
                 return;
             }
 
             //Affichage des cuisiniers (s'il en existe)
-            foreach (var c in cuisiniers) {
+            foreach (var c in cuisiniers)
+            {
                 Console.WriteLine($"{c.Key}. {c.Value}");
             }
 
             //Etape 2 : Le user sélectionne un cuisinier
             Console.Write("\nChoisissez un cuisinier (numéro) : ");
             //Verif si le numéro est conforme
-            if (!int.TryParse(Console.ReadLine(), out int cuisinierId) || !cuisiniers.ContainsKey(cuisinierId)) {
+            if (!int.TryParse(Console.ReadLine(), out int cuisinierId) || !cuisiniers.ContainsKey(cuisinierId))
+            {
                 Console.WriteLine("Choix invalide.");
                 return;
             }
@@ -313,13 +390,15 @@ namespace BDD
             //Ici, on utilise une classe pour les plats (puisqu'il peut y en avoir plusieurs)
             Dictionary<string, Plat> plats = GetPlats(cuisinierId);
 
-            if (plats.Count == 0) {
+            if (plats.Count == 0)
+            {
                 Console.WriteLine("Aucun plat disponible pour ce cuisinier.");
                 return;
             }
 
             //Afichage détaillé des plats
-            foreach (var p in plats) {
+            foreach (var p in plats)
+            {
                 Console.WriteLine($"{p.Key}. {p.Value.Nom} - {p.Value.Prix}€ ({p.Value.Quantite} disponibles)");
                 Console.WriteLine($"Type: {p.Value.Type} | Catégorie: {p.Value.Categorie}");
                 //"ToShortDateString" convertit le format DateTime en un string lisible pour nous
@@ -329,21 +408,24 @@ namespace BDD
 
             //Etape 4: On sélectionne les plats
             Dictionary<string, int> platsCommandes = new Dictionary<string, int>();
-            
+
             bool continuer = true; //Permet de ferme la boucle quand on veut
 
-            while (continuer) {
+            while (continuer)
+            {
                 Console.Write("Choisissez un plat (ID) ou 0 pour terminer : ");
                 string platId = Console.ReadLine();
 
                 //Arrêt de la prise de nouveaux plats
-                if (platId == "0") {
+                if (platId == "0")
+                {
                     continuer = false;
                     continue;
                 }
 
                 //Cas où l'ID n'est pas conforme (pas inclut ou pas bon format)
-                if (!plats.ContainsKey(platId)) {
+                if (!plats.ContainsKey(platId))
+                {
                     Console.WriteLine("ID de plat invalide.");
                     continue;
                 }
@@ -352,7 +434,8 @@ namespace BDD
 
                 //Cas où la quantité entrée n'est pas conforme 
                 Console.Write($"Quantité souhaitée (max {plats[platId].Quantite}) : ");
-                if (!int.TryParse(Console.ReadLine(), out int quantite) || quantite <= 0 || quantite > plats[platId].Quantite) {
+                if (!int.TryParse(Console.ReadLine(), out int quantite) || quantite <= 0 || quantite > plats[platId].Quantite)
+                {
                     Console.WriteLine("Quantité invalide.");
                     continue;
                 }
@@ -362,7 +445,8 @@ namespace BDD
             }
 
             //Cas où le client ne choisit pas de plat
-            if (platsCommandes.Count == 0) {
+            if (platsCommandes.Count == 0)
+            {
                 Console.WriteLine("Aucun plat sélectionné.");
                 return;
             }
@@ -371,7 +455,8 @@ namespace BDD
             Console.WriteLine("\nRécapitulatif de la commande :");
             decimal total = 0;
             //Calcul du prix à payer
-            foreach (var pc in platsCommandes) {
+            foreach (var pc in platsCommandes)
+            {
                 decimal prixPlat = plats[pc.Key].Prix * pc.Value;
                 Console.WriteLine($"{pc.Value}x {plats[pc.Key].Nom} - {prixPlat}€");
                 total += prixPlat;
@@ -380,16 +465,20 @@ namespace BDD
 
             Console.Write("\nConfirmer la commande ? (O/N) : ");
             //Le client ne souhaite finalement pas faire la commande
-            if (Console.ReadLine().ToUpper() != "O") {
+            if (Console.ReadLine().ToUpper() != "O")
+            {
                 Console.WriteLine("Commande annulée.");
                 return;
             }
 
             //Etape 6 : On enregistre la commande dans la BDD
-            try {
+            try
+            {
                 string commandeId = EnregistrerCommande(clientId, cuisinierId, platsCommandes, plats, total);
                 Console.WriteLine($"\nCommande enregistrée ! Numéro: {commandeId}");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Erreur: {ex.Message}");
             }
         }
@@ -397,11 +486,13 @@ namespace BDD
         /// Permet de renvoyer les cuisiniers et les détails sur eux (nom, spécialité,...)
         /// </summary>
         /// <returns></returns>
-        static Dictionary<int, string> GetCuisiniers() {
+        static Dictionary<int, string> GetCuisiniers()
+        {
             var cuisiniers = new Dictionary<int, string>();
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
 
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
                 connect.Open();
                 string requete = @"
             SELECT DISTINCT c.ClientID, u.PrenomU, u.NomU, c.SpecialiteC 
@@ -413,8 +504,10 @@ namespace BDD
 
                 MySqlCommand cmd = new MySqlCommand(requete, connect);
 
-                using (MySqlDataReader reader = cmd.ExecuteReader()) {
-                    while (reader.Read()) {
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
                         int id = reader.GetInt32("ClientID");
                         string info = $"{reader.GetString("PrenomU")} {reader.GetString("NomU")} - {reader.GetString("SpecialiteC")}";
                         cuisiniers.Add(id, info);
@@ -428,11 +521,13 @@ namespace BDD
         /// </summary>
         /// <param name="cuisinierId"></param>
         /// <returns></returns>
-        static Dictionary<string, Plat> GetPlats(int cuisinierId) {
+        static Dictionary<string, Plat> GetPlats(int cuisinierId)
+        {
             var plats = new Dictionary<string, Plat>();
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
 
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
                 connect.Open();
                 string requete = @"
             SELECT p.PlatID, p.NomPlat, p.TypePlat, p.PrixParPersonne, 
@@ -447,10 +542,13 @@ namespace BDD
                 MySqlCommand cmd = new MySqlCommand(requete, connect);
                 cmd.Parameters.AddWithValue("@CuisinierId", cuisinierId);
 
-                using (MySqlDataReader reader = cmd.ExecuteReader()) {
-                    while (reader.Read()) {
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
                         //On transfo le plat en une instance de la classe plat
-                        Plat p = new Plat {
+                        Plat p = new Plat
+                        {
                             Id = reader.GetString("PlatID"),
                             Nom = reader.GetString("NomPlat"),
                             Type = reader.GetString("TypePlat"),
@@ -463,7 +561,7 @@ namespace BDD
                         plats.Add(p.Id, p);
                     }
                 }
-            } 
+            }
             return plats;
         }
         /// <summary>
@@ -475,11 +573,13 @@ namespace BDD
         /// <param name="plats"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        static string EnregistrerCommande(int clientId, int cuisinierId, Dictionary<string, int> platsCommandes, 
-            Dictionary<string, Plat> plats, decimal total) {
+        static string EnregistrerCommande(int clientId, int cuisinierId, Dictionary<string, int> platsCommandes,
+            Dictionary<string, Plat> plats, decimal total)
+        {
 
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
                 connect.Open();
 
                 #region J'ai utilisé de l'IA pour cette partie
@@ -488,7 +588,7 @@ namespace BDD
                 #endregion
 
                 //Utiliser le trajet par défaut (à changer dans le futur)
-                string trajetId = "1"; 
+                string trajetId = "1";
 
                 //Créer la commande dans BonDeCommande_Liv
                 string reqCommande = @"
@@ -508,7 +608,8 @@ namespace BDD
                 cmdCommande.ExecuteNonQuery();
 
                 //On lie les plats à la commande via la table "Correspond"
-                foreach (var pc in platsCommandes) {
+                foreach (var pc in platsCommandes)
+                {
                     string reqCorrespond = @"
                 INSERT INTO Correspond 
                 (PlatID, CommandeID) 
@@ -540,7 +641,8 @@ namespace BDD
         /// qu'il puisse laisser des avis sur ses commandes passées.
         /// </summary>
         /// <param name="clientId"></param>
-        static void ConsulterCommandes(int clientId) {
+        static void ConsulterCommandes(int clientId)
+        {
             Console.WriteLine("\n=== MES COMMANDES ===");
 
             //Etape 1: On trouve les commandes du user
@@ -548,23 +650,27 @@ namespace BDD
             Dictionary<string, CommandePlat> commandes = GetCommandes(clientId);
 
             //Cas où aucune commande n'a été faite
-            if (commandes.Count == 0) {
+            if (commandes.Count == 0)
+            {
                 Console.WriteLine("Vous n'avez aucune commande.");
                 return;
             }
 
             //Etape 2 : Affichage des commandes
-            foreach (var cmd in commandes) {
+            foreach (var cmd in commandes)
+            {
                 Console.WriteLine($"\nCommande #{cmd.Key} du {cmd.Value.DateCommande.ToShortDateString()}");
                 Console.WriteLine($"Statut: {cmd.Value.Statut}");
                 Console.WriteLine("Plats commandés:");
 
                 //On affiche les plats qui ont été commandés par le client
-                foreach (var plat in cmd.Value.Plats) {
+                foreach (var plat in cmd.Value.Plats)
+                {
                     Console.WriteLine($"- {plat.Nom} ({plat.Prix}€)");
 
                     //Verif si un avis existe déjà (on peut pas faire plus d'un avis)
-                    if (plat.AvisExiste) {
+                    if (plat.AvisExiste)
+                    {
                         Console.WriteLine("Vous avez déjà noté ce plat !");
                     }
                 }
@@ -582,18 +688,21 @@ namespace BDD
             //Cherche les plats qui n'ont pas encore été notés
 
             //Si tous les plats ont été notés, la commande est déjà notée
-            if (platsANoter.Count == 0) {
+            if (platsANoter.Count == 0)
+            {
                 Console.WriteLine("Tous les plats de cette commande ont déjà été notés.");
                 return;
             }
 
-            for (int i = 0; i < platsANoter.Count; i++) {
+            for (int i = 0; i < platsANoter.Count; i++)
+            {
                 Console.WriteLine($"{i + 1}. {platsANoter[i].Nom}");
             }
 
             //Etape 5 : Le client sélectionne un plat à noter
             Console.Write("Choisissez un plat à noter (numéro) : ");
-            if (!int.TryParse(Console.ReadLine(), out int choixPlat) || choixPlat <= 0 || choixPlat > platsANoter.Count) {
+            if (!int.TryParse(Console.ReadLine(), out int choixPlat) || choixPlat <= 0 || choixPlat > platsANoter.Count)
+            {
                 Console.WriteLine("Choix invalide.");
                 return;
             }
@@ -602,7 +711,8 @@ namespace BDD
 
             //Etape 6 : Le client donne son avis
             Console.Write($"Note (0-5) pour {platSelectionne.Nom} : ");
-            if (!decimal.TryParse(Console.ReadLine(), out decimal note) || note < 0 || note > 5) {
+            if (!decimal.TryParse(Console.ReadLine(), out decimal note) || note < 0 || note > 5)
+            {
                 Console.WriteLine("Note invalide. Doit être entre 0 et 5.");
                 return;
             }
@@ -611,10 +721,13 @@ namespace BDD
             string commentaire = Console.ReadLine();
 
             //Etape 7 : On enregistre l'avis dans la BDD
-            try {
+            try
+            {
                 EnregistrerAvis(clientId, platSelectionne.PlatId, note, commentaire);
                 Console.WriteLine("Merci pour votre avis !");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Erreur : {ex.Message}");
             }
         }
@@ -624,11 +737,13 @@ namespace BDD
         /// </summary>
         /// <param name="clientId"></param>
         /// <returns></returns>
-        static Dictionary<string, CommandePlat> GetCommandes(int clientId) {
+        static Dictionary<string, CommandePlat> GetCommandes(int clientId)
+        {
             var commandes = new Dictionary<string, CommandePlat>();
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
 
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
                 connect.Open();
 
                 //Requête pour récupérer commandes avec plats
@@ -646,12 +761,16 @@ namespace BDD
                 MySqlCommand cmd = new MySqlCommand(requete, connect);
                 cmd.Parameters.AddWithValue("@ClientId", clientId);
 
-                using (MySqlDataReader reader = cmd.ExecuteReader()) {
-                    while (reader.Read()) {
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
                         string commandeId = reader.GetString("CommandeID");
 
-                        if (!commandes.ContainsKey(commandeId)) {
-                            commandes.Add(commandeId, new CommandePlat {
+                        if (!commandes.ContainsKey(commandeId))
+                        {
+                            commandes.Add(commandeId, new CommandePlat
+                            {
                                 CommandeId = commandeId,
                                 DateCommande = reader.GetDateTime("DateSouhaitee"),
                                 Statut = reader.GetString("Statut")
@@ -678,10 +797,12 @@ namespace BDD
         /// <param name="note"></param>
         /// <param name="commentaire"></param>
         /// <exception cref="Exception"></exception>
-        static void EnregistrerAvis(int clientId, string platId, decimal note, string commentaire) {
+        static void EnregistrerAvis(int clientId, string platId, decimal note, string commentaire)
+        {
             string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
 
-            using (MySqlConnection connect = new MySqlConnection(connectionString)) {
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
                 connect.Open();
 
                 //Verif si l'avis existe déja
@@ -690,7 +811,8 @@ namespace BDD
                 checkCmd.Parameters.AddWithValue("@ClientId", clientId);
                 checkCmd.Parameters.AddWithValue("@PlatId", platId);
 
-                if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0) {
+                if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
+                {
                     throw new Exception("Vous avez déjà noté ce plat.");
                 }
 
@@ -710,7 +832,184 @@ namespace BDD
                 insertCmd.ExecuteNonQuery();
             }
         }
-        static void Main(string[] args) {
+        static void CreerPlat(int chefId)
+        {
+            Console.WriteLine("\n--- Création d'un nouveau plat ---");
+
+            // Génération d'un ID unique pour chaque plat
+            string platId = "PLAT-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+
+            Console.Write("Nom du plat : ");
+            string nom = Console.ReadLine();
+
+            Console.Write("Type de plat : ");
+            string type = Console.ReadLine();
+
+            Console.Write("Prix par personne : ");
+            decimal prix = decimal.Parse(Console.ReadLine());
+
+            Console.Write("Quantité disponible : ");
+            int quantite = int.Parse(Console.ReadLine());
+
+            Console.Write("Catégorie alimentaire : ");
+            string categorie = Console.ReadLine();
+
+            // Insertion dans la table Plat
+            string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
+                connect.Open();
+
+                // Insertion du plat
+                string requete = @"INSERT INTO Plat (PlatID, NomPlat, TypePlat, DateCreation, DatePeremption, PrixParPersonne, QuantitePlat, CategorieAlimentaire)
+                         VALUES (@id, @nom, @type, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 7 DAY), @prix, @quantite, @categorie)";
+
+                MySqlCommand cmd = new MySqlCommand(requete, connect);
+                cmd.Parameters.AddWithValue("@id", platId);
+                cmd.Parameters.AddWithValue("@nom", nom);
+                cmd.Parameters.AddWithValue("@type", type);
+                cmd.Parameters.AddWithValue("@prix", prix.ToString());
+                cmd.Parameters.AddWithValue("@quantite", quantite);
+                cmd.Parameters.AddWithValue("@categorie", categorie);
+                cmd.ExecuteNonQuery();
+
+                // Lien avec le cuisinier
+                requete = "INSERT INTO Creer (PlatID, ClientID, DateCreation) VALUES (@platId, @chefId, CURDATE())";
+                cmd = new MySqlCommand(requete, connect);
+                cmd.Parameters.AddWithValue("@platId", platId);
+                cmd.Parameters.AddWithValue("@chefId", chefId);
+                cmd.ExecuteNonQuery();
+            }
+            GestionIngredients(platId);
+
+            Console.WriteLine("Plat créé");
+        }
+
+        static void GestionIngredients(string platId)
+        {
+            List<Ingredient> ingredients = GetIngredients();
+
+            while (true)
+            {
+                Console.WriteLine("\nIngrédients disponibles :");
+                foreach (var ing in ingredients)
+                {
+                    Console.WriteLine($"{ing.IngredientID}.{ing.Nom}");
+                }
+
+                Console.Write("Ajouter un ingrédient par son ID ou 0 pour terminer : ");
+                if (!int.TryParse(Console.ReadLine(), out int choix) || choix == 0) break;
+                //Vérifie que le cuisinier souhaite faire un choix ou ne rentre pas une valeur non conforme
+                var ingredient = ingredients.FirstOrDefault(i => i.IngredientID == choix);
+                if (ingredient == null)
+                {
+                    Console.WriteLine("ID invalide");
+                    continue;
+                }
+
+                Console.Write("Quantité nécessaire/utilisé (ex: '200 g' ou '2 pièces') : ");
+                string quantite = Console.ReadLine();
+                //Utilisation d'un string pour pouvoir stocker des quantités par poid ou par nombre
+                string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
+                using (MySqlConnection connect = new MySqlConnection(connectionString))
+                {
+                    connect.Open();
+                    string requete = "INSERT INTO Composé (PlatID, IngredientID, QuantiteUtile) VALUES (@plat, @ing, @quantite)";
+                    MySqlCommand cmd = new MySqlCommand(requete, connect);
+                    cmd.Parameters.AddWithValue("@plat", platId);
+                    cmd.Parameters.AddWithValue("@ing", choix);
+                    cmd.Parameters.AddWithValue("@quantite", quantite);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        static void AfficherCommandesCuisinier(int chefId)
+        {
+            string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
+
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
+                connect.Open();
+                string requete = @"SELECT DISTINCT b.CommandeID, b.Statut, b.DateSouhaitee, GROUP_CONCAT(p.NomPlat) AS Plats
+                         FROM BonDeCommande_Liv b
+                         JOIN Correspond c ON b.CommandeID = c.CommandeID
+                         JOIN Creer cr ON c.PlatID = cr.PlatID
+                         JOIN Plat p ON c.PlatID = p.PlatID
+                         WHERE cr.ClientID = @chefId
+                         GROUP BY b.CommandeID";
+
+                MySqlCommand cmd = new MySqlCommand(requete, connect);
+                cmd.Parameters.AddWithValue("@chefId", chefId);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    Console.WriteLine("\n--- COMMANDES EN COURS ---");
+                    while (reader.Read())
+                    {
+                        Console.WriteLine($"\nCommande {reader["CommandeID"]}");
+                        Console.WriteLine($"Statut: {reader["Statut"]}");
+                        Console.WriteLine($"Date: {reader["DateSouhaitee"]}");
+                        Console.WriteLine($"Plats: {reader["Plats"]}");
+                    }
+                }
+            }
+        }
+
+        static void MarquerCommandeTerminee(int chefId)
+        {
+            Console.Write("\nEntrez l'ID de la commande à marquer comme terminée : ");
+            string commandeId = Console.ReadLine();
+
+            string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
+                connect.Open();
+                string requete = "UPDATE BonDeCommande_Liv SET Statut = 'Terminé' WHERE CommandeID = @id";
+                MySqlCommand cmd = new MySqlCommand(requete, connect);
+                cmd.Parameters.AddWithValue("@id", commandeId);
+                //Marque la commande comme terminé, si le statut a été changé alors a>0
+                int a = cmd.ExecuteNonQuery();
+                if (a> 0)
+                    Console.WriteLine("Commande marqué terminé");
+                else
+                    Console.WriteLine("Aucune commande trouvée");
+            }
+        }
+        static void AfficherMesPlats(int chefId)
+        {
+            string connectionString = @"SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=1234";
+
+            using (MySqlConnection connect = new MySqlConnection(connectionString))
+            {
+                connect.Open();
+                string requete = @"SELECT p.*, GROUP_CONCAT(CONCAT(i.NomIngredient, ' (', c.QuantiteUtile, ')') SEPARATOR ', ') AS Ingredients
+                         FROM Plat p
+                         JOIN Creer cr ON p.PlatID = cr.PlatID
+                         LEFT JOIN Composé c ON p.PlatID = c.PlatID
+                         LEFT JOIN Ingredients i ON c.IngredientID = i.IngredientID
+                         WHERE cr.ClientID = @chefId
+                         GROUP BY p.PlatID";
+
+                MySqlCommand cmd = new MySqlCommand(requete, connect);
+                cmd.Parameters.AddWithValue("@chefId", chefId);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    Console.WriteLine("\n--- MES PLATS ---");
+                    while (reader.Read())
+                    {
+                        Console.WriteLine($"\nID: {reader["PlatID"]}");
+                        Console.WriteLine($"Nom: {reader["NomPlat"]}");
+                        Console.WriteLine($"Type: {reader["TypePlat"]}");
+                        Console.WriteLine($"Prix: {reader["PrixParPersonne"]}€");
+                        Console.WriteLine($"Quantité disponible: {reader["QuantitePlat"]}");
+                        Console.WriteLine($"Ingrédients: {reader["Ingredients"]}");
+                    }
+                }
+            }
+        }
+        static void Main(string[] args)
+        {
 
             //Entrée dans l'application
             Console.WriteLine("Bienvenue sur Liv'InParis\n");
@@ -721,42 +1020,56 @@ namespace BDD
 
             string choix = Console.ReadLine();
 
-            if (choix == "1") {
+            if (choix == "1")
+            {
                 Console.Write("Entrez votre email : ");
                 string email = Console.ReadLine();
                 Console.Write("Entrez votre mot de passe : ");
                 string mdp = Console.ReadLine();
 
-                if (VerifU(email, mdp)) {
+                if (VerifU(email, mdp))
+                {
                     int clientId = GetClientId(email);
                     Console.WriteLine("Connexion réussie ! Bienvenue sur Liv'InParis.");
 
                     //Veirfie si l'utilisateur est cuisinier
                     bool verifC = VerifC(clientId);
 
-                    if (verifC) {
+                    if (verifC)
+                    {
                         Console.WriteLine("\nVous êtes connecté en tant que CUISINIER.");
                         Console.WriteLine("1. Accéder à l'interface cuisinier");
                         Console.WriteLine("2. Accéder à l'interface client");
                         Console.Write("Votre choix : ");
                         //Chosir l'interface
 
-                        string role = Console.ReadLine(); 
-                        if (role == "1") {
+                        string role = Console.ReadLine();
+                        if (role == "1")
+                        {
                             InterfaceCuisinier(clientId);
-                        } else {
+                        }
+                        else
+                        {
                             InterfaceClient(clientId);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         Console.WriteLine("\nVous êtes connecté en tant que CLIENT.");
                         InterfaceClient(clientId);
                     }
-                } else {
+                }
+                else
+                {
                     Console.WriteLine("Identifiants incorrects. Veuillez réessayer.");
                 }
-            } else if (choix == "2") {
+            }
+            else if (choix == "2")
+            {
                 CreationU();
-            } else {
+            }
+            else
+            {
                 Console.WriteLine("Choix invalide. Veuillez redémarrer l'application.");
             }
 
